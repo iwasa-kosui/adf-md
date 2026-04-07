@@ -1,4 +1,8 @@
 import { Result } from '@praha/byethrow'
+import { unified } from 'unified'
+import remarkParse from 'remark-parse'
+import remarkStringify from 'remark-stringify'
+import remarkGfm from 'remark-gfm'
 import type { Root as MdastRoot, Nodes as MdastNode } from 'mdast'
 import type { ADFDocument, ADFNode } from './adf'
 import type { ConvertOptions, ConvertError, TransformContext } from './types'
@@ -96,4 +100,31 @@ export function mdastToAdf(
   } catch (e) {
     return Result.fail<ConvertError>(e as ConvertError)
   }
+}
+
+export function adfToMarkdown(
+  adf: ADFDocument,
+  options: ConvertOptions = {},
+): ReturnType<typeof Result.succeed<string>> | ReturnType<typeof Result.fail<ConvertError>> {
+  const mdastResult = adfToMdast(adf, options)
+  if (mdastResult.type === 'Failure') return mdastResult
+
+  const processor = unified()
+    .use(remarkStringify)
+    .use(remarkGfm)
+
+  const markdown = processor.stringify(mdastResult.value)
+  return Result.succeed(String(markdown))
+}
+
+export function markdownToAdf(
+  markdown: string,
+  options: ConvertOptions = {},
+): ReturnType<typeof Result.succeed<ADFDocument>> | ReturnType<typeof Result.fail<ConvertError>> {
+  const processor = unified()
+    .use(remarkParse)
+    .use(remarkGfm)
+
+  const mdast = processor.parse(markdown) as MdastRoot
+  return mdastToAdf(mdast, options)
 }
