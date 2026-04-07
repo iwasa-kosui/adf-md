@@ -1,4 +1,4 @@
-import type { List } from 'mdast'
+import type { List, ListItem } from 'mdast'
 import type { NodeConverter } from '../types'
 
 export const bulletListConverter: NodeConverter = {
@@ -33,12 +33,57 @@ export const orderedListConverter: NodeConverter = {
   toAdf: () => ({ type: 'orderedList', content: [] }),
 }
 
+export const taskListConverter: NodeConverter = {
+  adfType: 'taskList',
+  mdastType: [],
+  toMdast(node, context) {
+    return {
+      type: 'list',
+      ordered: false,
+      children: (node.content ?? []).map((item) => ({
+        type: 'listItem',
+        checked: item.attrs?.state === 'DONE',
+        children: context.convertChildren(item) as any[],
+      })),
+    } as any
+  },
+  toAdf: () => ({ type: 'taskList', attrs: { localId: '' }, content: [] }),
+}
+
+export const taskItemConverter: NodeConverter = {
+  adfType: 'taskItem',
+  mdastType: [],
+  toMdast(node, context) {
+    return {
+      type: 'listItem',
+      checked: node.attrs?.state === 'DONE',
+      children: context.convertChildren(node) as any[],
+    } as any
+  },
+  toAdf: () => ({ type: 'taskItem', attrs: { localId: '', state: 'TODO' } }),
+}
+
+function isTaskList(mdastList: List): boolean {
+  return mdastList.children.some((item) => typeof item.checked === 'boolean')
+}
+
 export const listConverter: NodeConverter = {
   adfType: [],
   mdastType: 'list',
   toMdast: () => ({ type: 'text', value: '' } as any),
   toAdf(node, context) {
     const mdastList = node as unknown as List
+    if (isTaskList(mdastList)) {
+      return {
+        type: 'taskList',
+        attrs: { localId: '' },
+        content: mdastList.children.map((item) => ({
+          type: 'taskItem',
+          attrs: { localId: '', state: item.checked ? 'DONE' : 'TODO' },
+          content: context.convertChildren(item) as any[],
+        })),
+      }
+    }
     const adfType = mdastList.ordered ? 'orderedList' : 'bulletList'
     return {
       type: adfType,

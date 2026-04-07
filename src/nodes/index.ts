@@ -5,7 +5,7 @@ import { blockquote } from './blockquote'
 import { rule } from './rule'
 import { hardBreak } from './hard-break'
 import { mdastStrongToAdf, mdastEmphasisToAdf, mdastDeleteToAdf, mdastLinkToAdf, mdastInlineCodeToAdf } from './text'
-import { bulletListConverter, orderedListConverter, listConverter, listItemConverter } from './list'
+import { bulletListConverter, orderedListConverter, listConverter, listItemConverter, taskListConverter, taskItemConverter } from './list'
 import { table } from './table'
 import { panel } from './panel'
 import { expand } from './expand'
@@ -61,6 +61,8 @@ const converters: NodeConverter[] = [
   orderedListConverter,
   listConverter,
   listItemConverter,
+  taskListConverter,
+  taskItemConverter,
   table,
   strongConverter,
   emphasisConverter,
