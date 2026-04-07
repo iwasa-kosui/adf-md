@@ -6,6 +6,7 @@ import { rule } from './rule'
 import { hardBreak } from './hard-break'
 import { mdastStrongToAdf, mdastEmphasisToAdf, mdastDeleteToAdf, mdastLinkToAdf, mdastInlineCodeToAdf } from './text'
 import { bulletListConverter, orderedListConverter, listConverter, listItemConverter } from './list'
+import { table } from './table'
 import type { NodeConverter } from '../types'
 
 const strongConverter: NodeConverter = {
@@ -54,6 +55,7 @@ const converters: NodeConverter[] = [
   orderedListConverter,
   listConverter,
   listItemConverter,
+  table,
   strongConverter,
   emphasisConverter,
   deleteConverter,
