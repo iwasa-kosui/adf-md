@@ -1,5 +1,9 @@
 import { paragraph } from './paragraph'
 import { heading } from './heading'
+import { codeBlock } from './code-block'
+import { blockquote } from './blockquote'
+import { rule } from './rule'
+import { hardBreak } from './hard-break'
 import { mdastStrongToAdf, mdastEmphasisToAdf, mdastDeleteToAdf, mdastLinkToAdf, mdastInlineCodeToAdf } from './text'
 import { bulletListConverter, orderedListConverter, listConverter, listItemConverter } from './list'
 import type { NodeConverter } from '../types'
@@ -42,6 +46,10 @@ const inlineCodeConverter: NodeConverter = {
 const converters: NodeConverter[] = [
   paragraph,
   heading,
+  codeBlock,
+  blockquote,
+  rule,
+  hardBreak,
   bulletListConverter,
   orderedListConverter,
   listConverter,
