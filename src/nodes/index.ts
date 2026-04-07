@@ -1,6 +1,7 @@
 import { paragraph } from './paragraph'
 import { heading } from './heading'
 import { mdastStrongToAdf, mdastEmphasisToAdf, mdastDeleteToAdf, mdastLinkToAdf, mdastInlineCodeToAdf } from './text'
+import { bulletListConverter, orderedListConverter, listConverter, listItemConverter } from './list'
 import type { NodeConverter } from '../types'
 
 const strongConverter: NodeConverter = {
@@ -41,6 +42,10 @@ const inlineCodeConverter: NodeConverter = {
 const converters: NodeConverter[] = [
   paragraph,
   heading,
+  bulletListConverter,
+  orderedListConverter,
+  listConverter,
+  listItemConverter,
   strongConverter,
   emphasisConverter,
   deleteConverter,
