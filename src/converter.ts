@@ -3,6 +3,7 @@ import { unified } from 'unified'
 import remarkParse from 'remark-parse'
 import remarkStringify from 'remark-stringify'
 import remarkGfm from 'remark-gfm'
+import remarkMdx from 'remark-mdx'
 import type { Root as MdastRoot, Nodes as MdastNode } from 'mdast'
 import type { ADFDocument, ADFNode } from './adf'
 import type { ConvertOptions, ConvertError, TransformContext } from './types'
@@ -10,7 +11,7 @@ import { adfConverters, mdastConverters } from './nodes/index'
 
 export function adfToMdast(
   doc: ADFDocument,
-  options: ConvertOptions,
+  options: ConvertOptions = {},
 ): ReturnType<typeof Result.succeed<MdastRoot>> | ReturnType<typeof Result.fail<ConvertError>> {
   if (doc.type !== 'doc') {
     return Result.fail<ConvertError>({
@@ -57,7 +58,7 @@ export function adfToMdast(
 
 export function mdastToAdf(
   root: MdastRoot,
-  options: ConvertOptions,
+  options: ConvertOptions = {},
 ): ReturnType<typeof Result.succeed<ADFDocument>> | ReturnType<typeof Result.fail<ConvertError>> {
   if (root.type !== 'root') {
     return Result.fail<ConvertError>({
@@ -111,6 +112,7 @@ export function adfToMarkdown(
 
   const processor = unified()
     .use(remarkStringify)
+    .use(remarkMdx)
     .use(remarkGfm)
 
   const markdown = processor.stringify(mdastResult.value)
@@ -123,6 +125,7 @@ export function markdownToAdf(
 ): ReturnType<typeof Result.succeed<ADFDocument>> | ReturnType<typeof Result.fail<ConvertError>> {
   const processor = unified()
     .use(remarkParse)
+    .use(remarkMdx)
     .use(remarkGfm)
 
   const mdast = processor.parse(markdown) as MdastRoot
