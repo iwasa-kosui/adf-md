@@ -8,6 +8,7 @@ import type { Root as MdastRoot, Nodes as MdastNode } from 'mdast'
 import type { ADFDocument, ADFNode } from './adf'
 import type { ConvertOptions, ConvertError, TransformContext } from './types'
 import { adfConverters, mdastConverters } from './nodes/index'
+import { adfTextToMdast } from './nodes/text'
 
 export function adfToMdast(
   doc: ADFDocument,
@@ -25,9 +26,10 @@ export function adfToMdast(
     const convertChildren = (node: ADFNode | MdastNode): (ADFNode | MdastNode)[] => {
       const adf = node as ADFNode
       const content = adf.content ?? []
-      return content.map((child) => {
+      return content.flatMap((child) => {
         if (child.type === 'text') {
-          return { type: 'text', value: child.text ?? '' } as unknown as MdastNode
+          const result = adfTextToMdast(child)
+          return Array.isArray(result) ? result : [result]
         }
         const converter = adfConverters.get(child.type)
         if (!converter) {
@@ -40,10 +42,11 @@ export function adfToMdast(
             throw error
           }
           options.onWarning?.({ message: error.message, node: child })
-          return null
+          return []
         }
-        return converter.toMdast(child, context) as unknown as MdastNode
-      }).filter((n): n is MdastNode => n !== null)
+        const result = converter.toMdast(child, context)
+        return Array.isArray(result) ? result : [result]
+      })
     }
 
     const context: TransformContext = { convertChildren, options }
@@ -72,9 +75,9 @@ export function mdastToAdf(
     const convertChildren = (node: ADFNode | MdastNode): (ADFNode | MdastNode)[] => {
       const mdast = node as { children?: MdastNode[] }
       const children = mdast.children ?? []
-      return children.map((child) => {
+      return children.flatMap((child) => {
         if (child.type === 'text') {
-          return { type: 'text', text: (child as { value: string }).value } as ADFNode
+          return [{ type: 'text', text: (child as { value: string }).value } as ADFNode]
         }
         const converter = mdastConverters.get(child.type)
         if (!converter) {
@@ -87,10 +90,11 @@ export function mdastToAdf(
             throw error
           }
           options.onWarning?.({ message: error.message, node: child })
-          return null
+          return []
         }
-        return converter.toAdf(child, context) as unknown as ADFNode
-      }).filter((n): n is ADFNode => n !== null)
+        const result = converter.toAdf(child, context)
+        return Array.isArray(result) ? result : [result]
+      })
     }
 
     const context: TransformContext = { convertChildren, options }
