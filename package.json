@@ -1,5 +1,7 @@
 {
   "name": "adf-md",
+  "description": "Bidirectional converter between Atlassian Document Format (ADF) and Markdown",
+  "keywords": ["adf", "markdown", "atlassian", "jira", "confluence", "converter"],
   "type": "module",
   "exports": {
     ".": {
