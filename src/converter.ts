@@ -7,7 +7,7 @@ import remarkMdx from 'remark-mdx'
 import type { Root as MdastRoot, Nodes as MdastNode } from 'mdast'
 import type { ADFDocument, ADFNode } from './adf'
 import type { ConvertOptions, ConvertError, TransformContext } from './types'
-import { adfConverters, mdastConverters } from './nodes/index'
+import { adfConverters, mdastConverters, jsxConverters } from './nodes/index'
 import { adfTextToMdast } from './nodes/text'
 
 export function adfToMdast(
@@ -78,6 +78,15 @@ export function mdastToAdf(
       return children.flatMap((child) => {
         if (child.type === 'text') {
           return [{ type: 'text', text: (child as { value: string }).value } as ADFNode]
+        }
+        if (child.type === 'mdxJsxFlowElement' || child.type === 'mdxJsxTextElement') {
+          const jsxName = (child as any).name
+          const jsxConverter = jsxConverters.get(jsxName)
+          if (jsxConverter) {
+            const result = jsxConverter.toAdf(child as any, context)
+            return Array.isArray(result) ? result : [result]
+          }
+          // fall through to unknown node handling
         }
         const converter = mdastConverters.get(child.type)
         if (!converter) {

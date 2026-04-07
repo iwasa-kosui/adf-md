@@ -7,6 +7,12 @@ import { hardBreak } from './hard-break'
 import { mdastStrongToAdf, mdastEmphasisToAdf, mdastDeleteToAdf, mdastLinkToAdf, mdastInlineCodeToAdf } from './text'
 import { bulletListConverter, orderedListConverter, listConverter, listItemConverter } from './list'
 import { table } from './table'
+import { panel } from './panel'
+import { expand } from './expand'
+import { status } from './status'
+import { mention } from './mention'
+import { emoji } from './emoji'
+import { mediaSingle, mediaGroup } from './media'
 import type { NodeConverter } from '../types'
 
 const strongConverter: NodeConverter = {
@@ -61,10 +67,18 @@ const converters: NodeConverter[] = [
   deleteConverter,
   linkConverter,
   inlineCodeConverter,
+  panel,
+  expand,
+  status,
+  mention,
+  emoji,
+  mediaSingle,
+  mediaGroup,
 ]
 
 export const adfConverters = new Map<string, NodeConverter>()
 export const mdastConverters = new Map<string, NodeConverter>()
+export const jsxConverters = new Map<string, NodeConverter>()
 
 for (const c of converters) {
   const adfTypes = Array.isArray(c.adfType) ? c.adfType : [c.adfType]
@@ -72,3 +86,11 @@ for (const c of converters) {
   const mdastTypes = Array.isArray(c.mdastType) ? c.mdastType : [c.mdastType]
   for (const t of mdastTypes) if (t) mdastConverters.set(t, c)
 }
+
+// Register JSX converters by component name
+jsxConverters.set('Panel', panel)
+jsxConverters.set('Expand', expand)
+jsxConverters.set('Status', status)
+jsxConverters.set('Mention', mention)
+jsxConverters.set('Emoji', emoji)
+jsxConverters.set('Media', mediaSingle)
