@@ -1,7 +1,8 @@
 import { paragraph } from './paragraph'
+import { heading } from './heading'
 import type { NodeConverter } from '../types'
 
-const converters: NodeConverter[] = [paragraph]
+const converters: NodeConverter[] = [paragraph, heading]
 
 export const adfConverters = new Map<string, NodeConverter>()
 export const mdastConverters = new Map<string, NodeConverter>()
