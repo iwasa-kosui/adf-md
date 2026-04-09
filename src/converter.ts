@@ -23,6 +23,8 @@ export function adfToMdast(
   }
 
   try {
+    const extensions = options.extensions ?? []
+
     const convertChildren = (node: ADFNode | MdastNode): (ADFNode | MdastNode)[] => {
       const adf = node as ADFNode
       const content = adf.content ?? []
@@ -31,20 +33,30 @@ export function adfToMdast(
           const result = adfTextToMdast(child)
           return Array.isArray(result) ? result : [result]
         }
-        const converter = adfConverters.get(child.type)
-        if (!converter) {
-          const error: ConvertError = {
-            kind: 'unknown_node',
-            message: `Unknown ADF node type: '${child.type}'`,
-            node: child,
+
+        const builtinConvert = (): MdastNode | MdastNode[] => {
+          const converter = adfConverters.get(child.type)
+          if (!converter) {
+            const error: ConvertError = {
+              kind: 'unknown_node',
+              message: `Unknown ADF node type: '${child.type}'`,
+              node: child,
+            }
+            if (options.unknownNodeBehavior === 'error') {
+              throw error
+            }
+            options.onWarning?.({ message: error.message, node: child })
+            return []
           }
-          if (options.unknownNodeBehavior === 'error') {
-            throw error
-          }
-          options.onWarning?.({ message: error.message, node: child })
-          return []
+          return converter.toMdast(child, context)
         }
-        const result = converter.toMdast(child, context)
+
+        const chain = extensions.reduceRight<() => MdastNode | MdastNode[]>(
+          (next, ext) => () => ext.toMdast(child, context, next),
+          builtinConvert,
+        )
+
+        const result = chain()
         return Array.isArray(result) ? result : [result]
       })
     }
