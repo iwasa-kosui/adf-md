@@ -84,6 +84,8 @@ export function mdastToAdf(
   }
 
   try {
+    const extensions = options.extensions ?? []
+
     const convertChildren = (node: ADFNode | MdastNode): (ADFNode | MdastNode)[] => {
       const mdast = node as { children?: MdastNode[] }
       const children = mdast.children ?? []
@@ -91,29 +93,37 @@ export function mdastToAdf(
         if (child.type === 'text') {
           return [{ type: 'text', text: (child as { value: string }).value } as ADFNode]
         }
-        if (child.type === 'mdxJsxFlowElement' || child.type === 'mdxJsxTextElement') {
-          const jsxName = (child as any).name
-          const jsxConverter = jsxConverters.get(jsxName)
-          if (jsxConverter) {
-            const result = jsxConverter.toAdf(child as any, context)
-            return Array.isArray(result) ? result : [result]
+
+        const builtinConvert = (): ADFNode | ADFNode[] => {
+          if (child.type === 'mdxJsxFlowElement' || child.type === 'mdxJsxTextElement') {
+            const jsxName = (child as any).name
+            const jsxConverter = jsxConverters.get(jsxName)
+            if (jsxConverter) {
+              return jsxConverter.toAdf(child as any, context)
+            }
           }
-          // fall through to unknown node handling
+          const converter = mdastConverters.get(child.type)
+          if (!converter) {
+            const error: ConvertError = {
+              kind: 'unknown_node',
+              message: `Unknown mdast node type: '${child.type}'`,
+              node: child,
+            }
+            if (options.unknownNodeBehavior === 'error') {
+              throw error
+            }
+            options.onWarning?.({ message: error.message, node: child })
+            return []
+          }
+          return converter.toAdf(child, context)
         }
-        const converter = mdastConverters.get(child.type)
-        if (!converter) {
-          const error: ConvertError = {
-            kind: 'unknown_node',
-            message: `Unknown mdast node type: '${child.type}'`,
-            node: child,
-          }
-          if (options.unknownNodeBehavior === 'error') {
-            throw error
-          }
-          options.onWarning?.({ message: error.message, node: child })
-          return []
-        }
-        const result = converter.toAdf(child, context)
+
+        const chain = extensions.reduceRight<() => ADFNode | ADFNode[]>(
+          (next, ext) => () => ext.toAdf(child, context, next),
+          builtinConvert,
+        )
+
+        const result = chain()
         return Array.isArray(result) ? result : [result]
       })
     }

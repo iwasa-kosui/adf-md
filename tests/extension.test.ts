@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'bun:test'
-import { adfToMarkdown } from '../src'
+import { adfToMarkdown, markdownToAdf } from '../src'
 import type { ADFDocument, Extension } from '../src'
 
 describe('Extension API (ADF → Markdown)', () => {
@@ -146,6 +146,58 @@ describe('Extension API (ADF → Markdown)', () => {
     expect(result.type).toBe('Success')
     if (result.type === 'Success') {
       expect(result.value).toContain('hello')
+    }
+  })
+})
+
+describe('Extension API (Markdown → ADF)', () => {
+  test('extension で MDX コンポーネントを ADF ノードに変換できる', () => {
+    const md = '<MyMacro>\n\nhello\n\n</MyMacro>'
+
+    const extension: Extension = {
+      toMdast: (_node, _ctx, next) => next(),
+      toAdf: (node, ctx, next) => {
+        if ((node as any).type === 'mdxJsxFlowElement' && (node as any).name === 'MyMacro') {
+          return {
+            type: 'bodiedExtension',
+            attrs: { extensionKey: 'MyMacro', extensionType: 'com.example', layout: 'default' },
+            content: ctx.convertChildren(node),
+          } as any
+        }
+        return next()
+      },
+    }
+
+    const result = markdownToAdf(md, { extensions: [extension] })
+    expect(result.type).toBe('Success')
+    if (result.type === 'Success') {
+      const ext = result.value.content[0]
+      expect(ext.type).toBe('bodiedExtension')
+      expect((ext as any).attrs.extensionKey).toBe('MyMacro')
+    }
+  })
+
+  test('extension で既存の MDAST → ADF 変換をオーバーライドできる', () => {
+    const md = '> quoted text'
+
+    const extension: Extension = {
+      toMdast: (_node, _ctx, next) => next(),
+      toAdf: (node, ctx, next) => {
+        if (node.type === 'blockquote') {
+          return {
+            type: 'panel',
+            attrs: { panelType: 'note' },
+            content: ctx.convertChildren(node),
+          } as any
+        }
+        return next()
+      },
+    }
+
+    const result = markdownToAdf(md, { extensions: [extension] })
+    expect(result.type).toBe('Success')
+    if (result.type === 'Success') {
+      expect(result.value.content[0].type).toBe('panel')
     }
   })
 })
