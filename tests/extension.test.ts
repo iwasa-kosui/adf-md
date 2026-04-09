@@ -1,8 +1,8 @@
 import { describe, test, expect } from 'bun:test'
 import { adfToMarkdown, markdownToAdf } from '../src'
-import type { ADFDocument, Extension } from '../src'
+import type { ADFDocument, Middleware } from '../src'
 
-describe('Extension API (ADF → Markdown)', () => {
+describe('Middleware API (ADF → Markdown)', () => {
   test('converts bodiedExtension to MDX component via extension', () => {
     const doc: ADFDocument = {
       version: 1,
@@ -18,7 +18,7 @@ describe('Extension API (ADF → Markdown)', () => {
       ],
     }
 
-    const extension: Extension = {
+    const extension: Middleware = {
       toMdast: (node, ctx, next) => {
         if (node.type === 'bodiedExtension') {
           return {
@@ -33,7 +33,7 @@ describe('Extension API (ADF → Markdown)', () => {
       toAdf: (_node, _ctx, next) => next(),
     }
 
-    const result = adfToMarkdown(doc, { extensions: [extension] })
+    const result = adfToMarkdown(doc, { middlewares: [extension] })
     expect(result.type).toBe('Success')
     if (result.type === 'Success') {
       expect(result.value).toContain('<MyMacro>')
@@ -56,7 +56,7 @@ describe('Extension API (ADF → Markdown)', () => {
       ],
     }
 
-    const extension: Extension = {
+    const extension: Middleware = {
       toMdast: (node, ctx, next) => {
         if (node.type === 'panel') {
           return {
@@ -69,7 +69,7 @@ describe('Extension API (ADF → Markdown)', () => {
       toAdf: (_node, _ctx, next) => next(),
     }
 
-    const result = adfToMarkdown(doc, { extensions: [extension] })
+    const result = adfToMarkdown(doc, { middlewares: [extension] })
     expect(result.type).toBe('Success')
     if (result.type === 'Success') {
       expect(result.value).toContain('> info text')
@@ -95,7 +95,7 @@ describe('Extension API (ADF → Markdown)', () => {
     }
 
     const visited: string[] = []
-    const extension: Extension = {
+    const extension: Middleware = {
       toMdast: (node, _ctx, next) => {
         visited.push(node.type)
         return next()
@@ -103,7 +103,7 @@ describe('Extension API (ADF → Markdown)', () => {
       toAdf: (_node, _ctx, next) => next(),
     }
 
-    const result = adfToMarkdown(doc, { extensions: [extension] })
+    const result = adfToMarkdown(doc, { middlewares: [extension] })
     expect(result.type).toBe('Success')
     expect(visited).toContain('heading')
     expect(visited).toContain('paragraph')
@@ -119,16 +119,16 @@ describe('Extension API (ADF → Markdown)', () => {
     }
 
     const order: number[] = []
-    const ext1: Extension = {
+    const ext1: Middleware = {
       toMdast: (_node, _ctx, next) => { order.push(1); return next() },
       toAdf: (_node, _ctx, next) => next(),
     }
-    const ext2: Extension = {
+    const ext2: Middleware = {
       toMdast: (_node, _ctx, next) => { order.push(2); return next() },
       toAdf: (_node, _ctx, next) => next(),
     }
 
-    const result = adfToMarkdown(doc, { extensions: [ext1, ext2] })
+    const result = adfToMarkdown(doc, { middlewares: [ext1, ext2] })
     expect(result.type).toBe('Success')
     expect(order).toEqual([1, 2])
   })
@@ -150,11 +150,11 @@ describe('Extension API (ADF → Markdown)', () => {
   })
 })
 
-describe('Extension API (Markdown → ADF)', () => {
+describe('Middleware API (Markdown → ADF)', () => {
   test('converts MDX component to ADF node via extension', () => {
     const md = '<MyMacro>\n\nhello\n\n</MyMacro>'
 
-    const extension: Extension = {
+    const extension: Middleware = {
       toMdast: (_node, _ctx, next) => next(),
       toAdf: (node, ctx, next) => {
         if ((node as any).type === 'mdxJsxFlowElement' && (node as any).name === 'MyMacro') {
@@ -168,7 +168,7 @@ describe('Extension API (Markdown → ADF)', () => {
       },
     }
 
-    const result = markdownToAdf(md, { extensions: [extension] })
+    const result = markdownToAdf(md, { middlewares: [extension] })
     expect(result.type).toBe('Success')
     if (result.type === 'Success') {
       const ext = result.value.content[0]
@@ -180,7 +180,7 @@ describe('Extension API (Markdown → ADF)', () => {
   test('overrides built-in MDAST to ADF conversion via extension', () => {
     const md = '> quoted text'
 
-    const extension: Extension = {
+    const extension: Middleware = {
       toMdast: (_node, _ctx, next) => next(),
       toAdf: (node, ctx, next) => {
         if (node.type === 'blockquote') {
@@ -194,7 +194,7 @@ describe('Extension API (Markdown → ADF)', () => {
       },
     }
 
-    const result = markdownToAdf(md, { extensions: [extension] })
+    const result = markdownToAdf(md, { middlewares: [extension] })
     expect(result.type).toBe('Success')
     if (result.type === 'Success') {
       expect(result.value.content[0].type).toBe('panel')
