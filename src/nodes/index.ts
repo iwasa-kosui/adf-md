@@ -13,6 +13,7 @@ import { status } from './status'
 import { mention } from './mention'
 import { emoji } from './emoji'
 import { mediaSingle, mediaGroup } from './media'
+import { inlineCard, blockCard, embedCard } from './card'
 import type { NodeConverter } from '../types'
 
 const strongConverter: NodeConverter = {
@@ -76,6 +77,9 @@ const converters: NodeConverter[] = [
   emoji,
   mediaSingle,
   mediaGroup,
+  inlineCard,
+  blockCard,
+  embedCard,
 ]
 
 export const adfConverters = new Map<string, NodeConverter>()
@@ -96,3 +100,6 @@ jsxConverters.set('Status', status)
 jsxConverters.set('Mention', mention)
 jsxConverters.set('Emoji', emoji)
 jsxConverters.set('Media', mediaSingle)
+jsxConverters.set('InlineCard', inlineCard)
+jsxConverters.set('BlockCard', blockCard)
+jsxConverters.set('EmbedCard', embedCard)

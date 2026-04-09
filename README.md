@@ -75,6 +75,9 @@ import { adfToMdast, mdastToAdf } from 'adf-md'
 | mention | `<Mention id="..." text="..." />` |
 | emoji | `<Emoji shortName="..." />` |
 | mediaSingle / mediaGroup | `<Media id="..." collection="..." />` |
+| inlineCard | `<InlineCard url="..." />` |
+| blockCard | `<BlockCard url="..." />` |
+| embedCard | `<EmbedCard url="..." layout="..." width="..." />` |
 
 ## Middlewares
 
