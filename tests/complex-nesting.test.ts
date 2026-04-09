@@ -199,14 +199,14 @@ describe('complex nesting', () => {
       expect(adfResult.type).toBe('Success')
       if (adfResult.type !== 'Success') return
 
-      // marks の順序はセマンティックに等価なため、順序非依存で比較
+      // marks order is semantically equivalent, so compare order-independently
       const importantText = adfResult.value.content[0].content![0].content![0]
         .content![0].content![0]
       expect(importantText.text).toBe('Important')
       expect(importantText.marks).toHaveLength(2)
       expect(importantText.marks!.map((m) => m.type).sort()).toEqual(['em', 'strong'])
 
-      // link と plain text は完全一致
+      // link and plain text must match exactly
       const paraContent = adfResult.value.content[0].content![0].content![0]
         .content![0].content!
       expect(paraContent[1]).toEqual({ type: 'text', text: ': see ' })
