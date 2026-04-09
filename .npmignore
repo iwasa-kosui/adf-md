@@ -1,0 +1,12 @@
+src/
+tests/
+docs/
+.wt/
+.claude/
+*.test.ts
+*.config.ts
+tsconfig.json
+tsup.config.ts
+vitest.config.ts
+bun.lock
+CLAUDE.md
