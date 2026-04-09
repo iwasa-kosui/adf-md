@@ -76,6 +76,47 @@ import { adfToMdast, mdastToAdf } from 'adf-md'
 | emoji | `<Emoji shortName="..." />` |
 | mediaSingle / mediaGroup | `<Media id="..." collection="..." />` |
 
+## Middlewares
+
+You can intercept, override, or observe the conversion of individual nodes by passing `middlewares` to the options. Each middleware wraps the built-in converter with a `next()` chain, similar to Express/Koa middleware.
+
+```ts
+import { adfToMarkdown, markdownToAdf } from 'adf-md'
+import type { Middleware } from 'adf-md'
+
+const middleware: Middleware = {
+  toMdast: (node, ctx, next) => {
+    // Convert bodiedExtension to an MDX component
+    if (node.type === 'bodiedExtension') {
+      return {
+        type: 'mdxJsxFlowElement',
+        name: node.attrs?.extensionKey ?? 'Unknown',
+        children: ctx.convertChildren(node),
+        attributes: [],
+      }
+    }
+    // Fall through to the built-in converter
+    return next()
+  },
+  toAdf: (node, ctx, next) => {
+    // Convert blockquote to ADF panel
+    if (node.type === 'blockquote') {
+      return {
+        type: 'panel',
+        attrs: { panelType: 'note' },
+        content: ctx.convertChildren(node),
+      }
+    }
+    return next()
+  },
+}
+
+adfToMarkdown(adf, { middlewares: [middleware] })
+markdownToAdf(md, { middlewares: [middleware] })
+```
+
+When multiple middlewares are provided, they execute in array order. Each middleware can call `next()` to delegate to the next middleware (or the built-in converter if it is the last one), or return its own result to short-circuit the chain.
+
 ## Error handling
 
 All conversion functions return a `Result` type from [`@praha/byethrow`](https://github.com/praha-inc/byethrow). No exceptions are thrown.

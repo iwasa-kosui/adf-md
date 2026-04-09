@@ -15,7 +15,7 @@ export type ConvertError = {
 export type ConvertOptions = {
   unknownNodeBehavior?: 'skip' | 'error'
   onWarning?: (warning: ConvertWarning) => void
-  extensions?: Extension[]
+  middlewares?: Middleware[]
 }
 
 export type TransformContext = {
@@ -30,7 +30,7 @@ export type NodeConverter = {
   toAdf: (node: MdastNode, context: TransformContext) => ADFNode | ADFNode[]
 }
 
-export type Extension = {
+export type Middleware = {
   toMdast: (
     node: ADFNode,
     ctx: TransformContext,

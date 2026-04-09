@@ -23,7 +23,7 @@ export function adfToMdast(
   }
 
   try {
-    const extensions = options.extensions ?? []
+    const middlewares = options.middlewares ?? []
 
     const convertChildren = (node: ADFNode | MdastNode): (ADFNode | MdastNode)[] => {
       const adf = node as ADFNode
@@ -51,7 +51,7 @@ export function adfToMdast(
           return converter.toMdast(child, context)
         }
 
-        const chain = extensions.reduceRight<() => MdastNode | MdastNode[]>(
+        const chain = middlewares.reduceRight<() => MdastNode | MdastNode[]>(
           (next, ext) => () => ext.toMdast(child, context, next),
           builtinConvert,
         )
@@ -84,7 +84,7 @@ export function mdastToAdf(
   }
 
   try {
-    const extensions = options.extensions ?? []
+    const middlewares = options.middlewares ?? []
 
     const convertChildren = (node: ADFNode | MdastNode): (ADFNode | MdastNode)[] => {
       const mdast = node as { children?: MdastNode[] }
@@ -118,7 +118,7 @@ export function mdastToAdf(
           return converter.toAdf(child, context)
         }
 
-        const chain = extensions.reduceRight<() => ADFNode | ADFNode[]>(
+        const chain = middlewares.reduceRight<() => ADFNode | ADFNode[]>(
           (next, ext) => () => ext.toAdf(child, context, next),
           builtinConvert,
         )
