@@ -1,16 +1,16 @@
 # adf-md
 
-Bidirectional converter between [Atlassian Document Format (ADF)](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/) and Markdown.
+[Atlassian Document Format (ADF)](https://developer.atlassian.com/cloud/jira/platform/apis/document/structure/) と Markdown の双方向コンバーター。
 
-Convert between ADF used internally by Jira / Confluence and Markdown, and vice versa. ADF-specific nodes (Panel, Expand, Status, Mention, Emoji, etc.) are mapped to MDX JSX syntax, enabling lossless bidirectional conversion.
+Jira / Confluence が内部で使用する ADF を Markdown に変換したり、その逆を行えます。ADF 固有のノード (Panel, Expand, Status, Mention, Emoji など) は MDX の JSX 構文にマッピングされるため、情報の欠落なく双方向変換が可能です。
 
-## Installation
+## インストール
 
 ```bash
 npm install adf-md
 ```
 
-## Usage
+## 使い方
 
 ### ADF → Markdown
 
@@ -46,17 +46,17 @@ if (result.type === 'Success') {
 }
 ```
 
-### AST-level conversion
+### AST レベルの変換
 
-If you want to work directly with mdast (Markdown AST) instead of Markdown strings, you can use the low-level API.
+Markdown 文字列ではなく mdast (Markdown AST) を直接扱いたい場合は、低レベル API を使用できます。
 
 ```ts
 import { adfToMdast, mdastToAdf } from 'adf-md'
 ```
 
-## Supported nodes
+## 対応ノード
 
-| ADF node | Markdown / MDX |
+| ADF ノード | Markdown / MDX |
 |---|---|
 | paragraph | paragraph |
 | heading | `#` ~ `######` |
@@ -76,9 +76,9 @@ import { adfToMdast, mdastToAdf } from 'adf-md'
 | emoji | `<Emoji shortName="..." />` |
 | mediaSingle / mediaGroup | `<Media id="..." collection="..." />` |
 
-## Error handling
+## エラーハンドリング
 
-All conversion functions return a `Result` type from [`@praha/byethrow`](https://github.com/praha-inc/byethrow). No exceptions are thrown.
+すべての変換関数は [`@praha/byethrow`](https://github.com/praha-inc/byethrow) の `Result` 型を返します。例外は throw されません。
 
 ```ts
 const result = adfToMarkdown(adf)
@@ -87,19 +87,19 @@ if (result.type === 'Failure') {
 }
 ```
 
-### Options
+### オプション
 
 ```ts
 import { adfToMarkdown } from 'adf-md'
 
 const result = adfToMarkdown(adf, {
-  // Whether to treat unknown nodes as errors or skip them (default: 'skip')
+  // 未知のノードをエラーにするか、スキップするか (default: 'skip')
   unknownNodeBehavior: 'error',
-  // Warning callback when nodes are skipped
+  // スキップ時の警告コールバック
   onWarning: (warning) => console.warn(warning.message),
 })
 ```
 
-## License
+## ライセンス
 
 MIT
