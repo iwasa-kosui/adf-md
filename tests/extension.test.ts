@@ -3,7 +3,7 @@ import { adfToMarkdown, markdownToAdf } from '../src'
 import type { ADFDocument, Extension } from '../src'
 
 describe('Extension API (ADF → Markdown)', () => {
-  test('extension で bodiedExtension を MDX コンポーネントに変換できる', () => {
+  test('converts bodiedExtension to MDX component via extension', () => {
     const doc: ADFDocument = {
       version: 1,
       type: 'doc',
@@ -41,7 +41,7 @@ describe('Extension API (ADF → Markdown)', () => {
     }
   })
 
-  test('extension で既存コンバータをオーバーライドできる', () => {
+  test('overrides built-in converter via extension', () => {
     const doc: ADFDocument = {
       version: 1,
       type: 'doc',
@@ -77,7 +77,7 @@ describe('Extension API (ADF → Markdown)', () => {
     }
   })
 
-  test('extension で next() を呼んでビルトイン結果を加工できる', () => {
+  test('proxies through next() to observe built-in conversion', () => {
     const doc: ADFDocument = {
       version: 1,
       type: 'doc',
@@ -109,7 +109,7 @@ describe('Extension API (ADF → Markdown)', () => {
     expect(visited).toContain('paragraph')
   })
 
-  test('複数の extension がチェーンされる', () => {
+  test('chains multiple extensions in order', () => {
     const doc: ADFDocument = {
       version: 1,
       type: 'doc',
@@ -133,7 +133,7 @@ describe('Extension API (ADF → Markdown)', () => {
     expect(order).toEqual([1, 2])
   })
 
-  test('extension なしの場合は既存の動作と同じ', () => {
+  test('works the same without extensions', () => {
     const doc: ADFDocument = {
       version: 1,
       type: 'doc',
@@ -151,7 +151,7 @@ describe('Extension API (ADF → Markdown)', () => {
 })
 
 describe('Extension API (Markdown → ADF)', () => {
-  test('extension で MDX コンポーネントを ADF ノードに変換できる', () => {
+  test('converts MDX component to ADF node via extension', () => {
     const md = '<MyMacro>\n\nhello\n\n</MyMacro>'
 
     const extension: Extension = {
@@ -177,7 +177,7 @@ describe('Extension API (Markdown → ADF)', () => {
     }
   })
 
-  test('extension で既存の MDAST → ADF 変換をオーバーライドできる', () => {
+  test('overrides built-in MDAST to ADF conversion via extension', () => {
     const md = '> quoted text'
 
     const extension: Extension = {
