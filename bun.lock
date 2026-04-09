@@ -16,10 +16,8 @@
         "@types/bun": "latest",
         "@types/mdast": "^4.0.4",
         "tsup": "^8.5.1",
-        "vitest": "^4.1.2",
-      },
-      "peerDependencies": {
         "typescript": "^6.0.2",
+        "vitest": "^4.1.2",
       },
     },
   },
