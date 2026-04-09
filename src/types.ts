@@ -15,6 +15,7 @@ export type ConvertError = {
 export type ConvertOptions = {
   unknownNodeBehavior?: 'skip' | 'error'
   onWarning?: (warning: ConvertWarning) => void
+  extensions?: Extension[]
 }
 
 export type TransformContext = {
@@ -27,4 +28,17 @@ export type NodeConverter = {
   mdastType: string | string[]
   toMdast: (node: ADFNode, context: TransformContext) => MdastNode | MdastNode[]
   toAdf: (node: MdastNode, context: TransformContext) => ADFNode | ADFNode[]
+}
+
+export type Extension = {
+  toMdast: (
+    node: ADFNode,
+    ctx: TransformContext,
+    next: () => MdastNode | MdastNode[]
+  ) => MdastNode | MdastNode[]
+  toAdf: (
+    node: MdastNode,
+    ctx: TransformContext,
+    next: () => ADFNode | ADFNode[]
+  ) => ADFNode | ADFNode[]
 }
