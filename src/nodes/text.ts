@@ -1,6 +1,7 @@
 import type { ADFNode, ADFMark } from '../adf'
 import type { Nodes as MdastNode } from 'mdast'
 import type { TransformContext } from '../types'
+import { decodeAttachmentUrl } from './media'
 
 // ADF text with marks → mdast nodes
 export function adfTextToMdast(node: ADFNode): MdastNode | MdastNode[] {
@@ -68,3 +69,18 @@ export const mdastLinkToAdf = (node: MdastNode, context: TransformContext): ADFN
 
 export const mdastInlineCodeToAdf = (node: MdastNode): ADFNode[] =>
   [{ type: 'text', text: (node as any).value, marks: [{ type: 'code' }] }]
+
+// mdast image → ADF: attachment: URLs become mediaInline; others are skipped
+export const mdastImageToAdf = (node: MdastNode): ADFNode | ADFNode[] => {
+  const url = (node as any).url as string
+  const decoded = decodeAttachmentUrl(url)
+  if (decoded.kind !== 'attachment') return []
+  return {
+    type: 'mediaInline',
+    attrs: {
+      id: decoded.id,
+      type: decoded.type,
+      collection: decoded.collection,
+    },
+  }
+}

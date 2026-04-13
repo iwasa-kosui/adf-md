@@ -4,7 +4,7 @@ import { codeBlock } from './code-block'
 import { blockquote } from './blockquote'
 import { rule } from './rule'
 import { hardBreak } from './hard-break'
-import { mdastStrongToAdf, mdastEmphasisToAdf, mdastDeleteToAdf, mdastLinkToAdf, mdastInlineCodeToAdf } from './text'
+import { mdastStrongToAdf, mdastEmphasisToAdf, mdastDeleteToAdf, mdastLinkToAdf, mdastInlineCodeToAdf, mdastImageToAdf } from './text'
 import { bulletListConverter, orderedListConverter, listConverter, listItemConverter, taskListConverter, taskItemConverter } from './list'
 import { table } from './table'
 import { panel } from './panel'
@@ -12,7 +12,7 @@ import { expand } from './expand'
 import { status } from './status'
 import { mention } from './mention'
 import { emoji } from './emoji'
-import { mediaSingle, mediaGroup } from './media'
+import { mediaSingle, mediaGroup, mediaInline } from './media'
 import type { NodeConverter } from '../types'
 
 const strongConverter: NodeConverter = {
@@ -50,6 +50,13 @@ const inlineCodeConverter: NodeConverter = {
   toAdf: (node, _context) => mdastInlineCodeToAdf(node),
 }
 
+const imageConverter: NodeConverter = {
+  adfType: [],
+  mdastType: 'image',
+  toMdast: () => ({ type: 'text', value: '' } as any),
+  toAdf: (node) => mdastImageToAdf(node),
+}
+
 const converters: NodeConverter[] = [
   paragraph,
   heading,
@@ -69,6 +76,7 @@ const converters: NodeConverter[] = [
   deleteConverter,
   linkConverter,
   inlineCodeConverter,
+  imageConverter,
   panel,
   expand,
   status,
@@ -76,6 +84,7 @@ const converters: NodeConverter[] = [
   emoji,
   mediaSingle,
   mediaGroup,
+  mediaInline,
 ]
 
 export const adfConverters = new Map<string, NodeConverter>()
@@ -95,4 +104,3 @@ jsxConverters.set('Expand', expand)
 jsxConverters.set('Status', status)
 jsxConverters.set('Mention', mention)
 jsxConverters.set('Emoji', emoji)
-jsxConverters.set('Media', mediaSingle)
